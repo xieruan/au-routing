@@ -2,4 +2,4 @@
 
 ## au 的xray透明代理使用
 
-[1](https://)
+[参考xray](https://xtls.github.io/documents/level-1/)
