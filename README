@@ -1,3 +1,6 @@
-au机场客户端xray透明代理配置
+### au机场客户端xray透明代理配置
 
-国内机免流国内站走国内机，国外走proxy tag
+### 国内机免流国内站走国内机，国外走proxy tag
+
+
+xray routing [入门技巧](https://xtls.github.io/documents/level-1/)
