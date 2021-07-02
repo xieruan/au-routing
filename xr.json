@@ -1,47 +1,47 @@
 {
-  "log": {
-    "access": "/var/log/au/xr.log"
-  },
-  "stats": {},
-  "api": {
-    "services": [
-      "HandlerService",
-      "StatsService"
-    ],
-    "tag": "api"
-  },
-  "policy": {
-    "levels": {
-      "0": {
-        "statsUserDownlink": true,
-        "statsUserUplink": true
-      }
-    }
-  },
-  "inbounds": [
-    {
-      "listen": "127.0.0.1",
-      "port": 10085,
-      "protocol": "dokodemo-door",
-      "settings": {
-        "address": "127.0.0.1"
-      },
-      "tag": "api"
-    }
-  ],
-  "outbounds": [
-    {
-      "tag": "direct",
-      "protocol": "freedom",
-      "settings": {}
+    "log": {
+        "access": "/var/log/au/xr.log"
     },
-    {
-      "tag": "blackhole",
-      "protocol": "blackhole",
-      "settings": {}
+    "stats": {},
+    "api": {
+        "services": [
+            "HandlerService",
+            "StatsService"
+        ],
+        "tag": "api"
     },
+    "policy": {
+        "levels": {
+            "0": {
+                "statsUserDownlink": true,
+                "statsUserUplink": true
+            }
+        }
+    },
+    "inbounds": [
         {
-            "tag": "proxy",       //出口tag，填写具体可参考xray client
+            "listen": "127.0.0.1",
+            "port": 10085,
+            "protocol": "dokodemo-door",
+            "settings": {
+                "address": "127.0.0.1"
+            },
+            "tag": "api"
+        }
+    ],
+    "outbounds": [
+        {
+            "tag": "direct",
+            "protocol": "freedom",
+            "settings": {}
+        },
+        {
+            "tag": "blackhole",
+            "protocol": "blackhole",
+            "settings": {}
+        },
+        {
+            "tag": "proxy",
             "protocol": "vmess",
             "settings": {
                 "vnext": [
@@ -50,7 +50,10 @@
                         "port": 端口,
                         "users": [
                             {
-                                "id": "uuid"  //uuid填你的就行，用户会正常计费
+                                "id": "uuid",
+                                "level": 0,
+                                "security": "auto",
+                                "alterId": 2
                             }
                         ]
                     }
@@ -58,54 +61,98 @@
             },
             "streamSettings": {
                 "network": "ws",
-                "security": "none"
-            },
-			 "wsSettings": {
-                    "path": "/cexhjamkdsjdadwxsax" 
+                "wsSettings": {
+                    "path": "/path路径"
                 }
+            }
         }
-  ],
-  "routing": {
-    "rules": [
-      {
-        "inboundTag": [
-          "api"
-        ],
-        "outboundTag": "api",
-        "type": "field"
-      },
-      {
-        "type": "field",
-        "protocol": [
-          "bittorrent"
-        ],
-        "outboundTag": "blackhole"
-      },
-      {
-        "type": "field",
-        "ip": [
-          "127.0.0.1/32",
-          "10.0.0.0/8",
-          "fc00::/7",
-          "fe80::/10",
-          "172.16.0.0/12"
-        ],
-        "outboundTag": "blackhole"
-      },
-	  {
-            "type": "field",
-            "domain": [
-                "geosite:cn"
-            ],
-            "outboundTag": "direct"
-       },
-	    {
-            "type": "field",
-            "domain": [
-                "geosite:geolocation-!cn"
-            ],
-            "outboundTag": "proxy"
-        }
-    ]
-  }
+    ],
+    "dns": {
+        "servers": [
+            {
+                "address": "1.1.1.1",
+                "domains": [
+                    "geosite:geolocation-!cn"
+                ]
+            },
+            {
+                "address": "223.5.5.5",
+                "domains": [
+                    "geosite:cn"
+                ],
+                "expectIPs": [
+                    "geoip:cn"
+                ]
+            },
+            {
+                "address": "114.114.114.114",
+                "domains": [
+                    "geosite:cn"
+                ]
+            },
+            "localhost"
+        ]
+    },
+    "routing": {
+        "rules": [
+            {
+                "inboundTag": [
+                    "api"
+                ],
+                "outboundTag": "api",
+                "type": "field"
+            },
+            {
+                "type": "field",
+                "domain": [
+                    "geosite:cn"
+                ],
+                "outboundTag": "direct"
+            },
+            {
+                "type": "field",
+                "ip": [
+                    "geoip:cn",
+                    "geoip:private",
+                    "223.5.5.5",
+                    "114.114.114.114"
+                ],
+                "outboundTag": "direct"
+            },
+            {
+                "type": "field",
+                "ip": [
+                    "8.8.8.8",
+                    "1.1.1.1"
+                ],
+                "outboundTag": "proxy"
+            },
+            {
+                "type": "field",
+                "domain": [
+                    "geosite:geolocation-!cn"
+                ],
+                "outboundTag": "proxy"
+            },
+            {
+                "type": "field",
+                "ip": [
+                    "127.0.0.1/32",
+                    "10.0.0.0/8",
+                    "fc00::/7",
+                    "fe80::/10",
+                    "172.16.0.0/12"
+                ],
+                "outboundTag": "blackhole"
+            },
+            {
+                "type": "chinasites",
+                "outboundTag": "direct"
+            },
+            {
+                "type": "chinaip",
+                "outboundTag": "direct"
+            }
+        ]
+    }
 }
